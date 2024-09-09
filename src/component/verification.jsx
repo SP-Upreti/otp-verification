@@ -79,6 +79,7 @@ export default function Verification() {
                 navigate('/welcome');
             } else {
                 setErr(true);
+                setMessage("invalid OTP")
             }
         } catch (error) {
             console.error("Error verifying code:", error);
