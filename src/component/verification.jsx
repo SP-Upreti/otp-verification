@@ -44,7 +44,7 @@ export default function Verification() {
 
     const fetchApi = async () => {
         try {
-            const url = "http://localhost:4500/authenticate";
+            const url = "https://server-eight-puce-16.vercel.app/authenticate";
             const response = await fetch(url);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -60,7 +60,7 @@ export default function Verification() {
 
     const verifycode = async (code) => {
         try {
-            const response = await fetch("http://localhost:4500/verify", {
+            const response = await fetch("https://server-eight-puce-16.vercel.app/verify", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
