@@ -1,0 +1,183 @@
+import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
+export default function Verification() {
+    const [code, setCode] = useState({
+        inp1: "",
+        inp2: "",
+        inp3: "",
+        inp4: "",
+        inp5: "",
+        inp6: ""
+    });
+    const [otp, setOtp] = useState(null);
+    const [err, setErr] = useState(false);
+    const [load, setLoad] = useState(false);
+    const [modal, setModal] = useState(false);
+    const [message, setMessage] = useState("");
+
+    const inpRefs = [
+        useRef(null),
+        useRef(null),
+        useRef(null),
+        useRef(null),
+        useRef(null),
+        useRef(null)
+    ];
+
+    const navigate = useNavigate();
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        if (value.length <= 1) {
+            setCode((prevCode) => ({
+                ...prevCode,
+                [name]: value
+            }));
+
+            const currentIndex = parseInt(name.replace('inp', '')) - 1;
+            if (value && currentIndex < inpRefs.length - 1) {
+                inpRefs[currentIndex + 1].current.focus();
+            }
+        }
+    };
+
+    const fetchApi = async () => {
+        try {
+            const url = "http://localhost:4500/authenticate";
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            console.log("Fetched OTP:", data.code);
+            setOtp(data.code);
+        } catch (error) {
+            console.error("Error fetching OTP:", error);
+            setErr(true);
+        }
+    };
+
+    const verifycode = async (code) => {
+        try {
+            const response = await fetch("http://localhost:4500/verify", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ code })
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const result = await response.json();
+            console.log("Verification result:", result);
+
+            if (result.success) {
+                navigate('/welcome');
+            } else {
+                setErr(true);
+            }
+        } catch (error) {
+            console.error("Error verifying code:", error);
+            setErr(true);
+        }
+    };
+
+    useEffect(() => {
+        fetchApi();
+    }, []);
+
+    const verify = (inputCode) => {
+        if (otp !== null) {
+            console.log("OTP from API:", otp);
+            console.log("Input code:", inputCode);
+            verifycode(inputCode);
+            setLoad(false);
+        } else {
+            console.log("OTP is still undefined");
+            setLoad(false);
+        }
+    };
+
+    const handleSubmit = () => {
+        const inpData = Object.values(code);
+
+        const allDigits = Object.values(inpData).join("");
+        if (allDigits.endsWith("7")) {
+            setErr(true)
+            setMessage("number cannot end with 7")
+        }
+
+        const allNumbers = inpData.every(data => /^[0-9]$/.test(data));
+
+        if (!allNumbers) {
+            setErr(true);
+            setMessage("code can only be number and cannot be empty")
+            setLoad(false);
+        } else {
+            setErr(false);
+            setLoad(true); // Set load to true before verification
+            verify(inpData.join(""));
+        }
+    };
+
+    return (
+        <div className="relative h-screen flex justify-center items-center relative">
+            <form method="post" onSubmit={(e) => {
+                e.preventDefault();
+                handleSubmit();
+            }}>
+                <div className="flex flex-col items-center justify-center gap-4">
+                    <div className="text-2xl font-bold font-serif text-center">Verification Code</div>
+                    <div className="flex gap-4 items-center">
+                        {Array.from({ length: 6 }).map((data, index) => (
+                            <input
+                                key={index}
+                                type="text"
+                                name={`inp${index + 1}`}
+                                value={code[`inp${index + 1}`]}
+                                onChange={handleInputChange}
+                                ref={inpRefs[index]}
+                                className={`border border-black h-[2rem] w-[2rem] px-1 text-center focus:outline-blue-500`}
+                                maxLength={1}
+                                autoFocus={index === 0}
+                            />
+                        ))}
+                    </div>
+                    {err && (
+                        <p className="text-red-600 font-semibold">{message}</p>
+                    )}
+                    <div>
+                        <button disabled={load} className="bg-blue-950 text-white px-4 py-1 text-lg rounded-md">
+                            {load ? "Verifying..." : "Submit"}
+                        </button>
+                    </div>
+                    <div className="">
+                        <p className=" font-semibold cursor-pointer" onClick={() => { setModal(true) }}>request  OTP</p>
+                    </div>
+                </div>
+            </form>
+            <div className="absolute bottom-[1rem] text-sm">
+                <p>Project created by <a href="" className="text-green-500 font-bold">Surendra</a></p>
+            </div>
+            {
+                modal && (<Modal code={otp} onclick={() => { setModal(false) }} />)
+            }
+        </div>
+    );
+}
+
+
+function Modal({ code, onclick }) {
+    return (
+        <div className="absolute h-screen w-full flex justify-center items-center bg-black bg-opacity-75">
+            <div className=" bg-white w-[300px] p-4 text-center">
+                <p className="font-semibold text-xl">Your OTP:  {code}</p>
+                <button onClick={onclick} className="mt-4 border border-black rounded-sm px-4">Ok</button>
+            </div>
+        </div>
+    )
+}
