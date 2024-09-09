@@ -42,6 +42,24 @@ export default function Verification() {
         }
     };
 
+    // Handle the paste event
+    const handlePaste = (e) => {
+        const pastedData = e.clipboardData.getData("Text");
+        if (/^\d{6}$/.test(pastedData)) {
+            const splitCode = pastedData.split("");
+            const newCode = {
+                inp1: splitCode[0],
+                inp2: splitCode[1],
+                inp3: splitCode[2],
+                inp4: splitCode[3],
+                inp5: splitCode[4],
+                inp6: splitCode[5],
+            };
+            setCode(newCode);
+            inpRefs[5].current.focus(); // Focus on the last input after pasting
+        }
+    };
+
     const fetchApi = async () => {
         try {
             const url = "https://server-eight-puce-16.vercel.app/authenticate";
@@ -79,7 +97,7 @@ export default function Verification() {
                 navigate('/welcome');
             } else {
                 setErr(true);
-                setMessage("invalid OTP")
+                setMessage("Invalid OTP")
             }
         } catch (error) {
             console.error("Error verifying code:", error);
@@ -109,14 +127,14 @@ export default function Verification() {
         const allDigits = Object.values(inpData).join("");
         if (allDigits.endsWith("7")) {
             setErr(true)
-            setMessage("number cannot end with 7")
+            setMessage("Number cannot end with 7")
         }
 
         const allNumbers = inpData.every(data => /^[0-9]$/.test(data));
 
         if (!allNumbers) {
             setErr(true);
-            setMessage("code can only be number and cannot be empty")
+            setMessage("Code can only be numbers and cannot be empty")
             setLoad(false);
         } else {
             setErr(false);
@@ -126,7 +144,7 @@ export default function Verification() {
     };
 
     return (
-        <div className="relative h-screen flex justify-center items-center relative">
+        <div className="relative h-[80vh] lg:h-screen flex justify-center items-center " style={{ boxSizing: "border-box" }}>
             <form method="post" onSubmit={(e) => {
                 e.preventDefault();
                 handleSubmit();
@@ -141,6 +159,7 @@ export default function Verification() {
                                 name={`inp${index + 1}`}
                                 value={code[`inp${index + 1}`]}
                                 onChange={handleInputChange}
+                                onPaste={index === 0 ? handlePaste : null}  // Attach handlePaste to the first input
                                 ref={inpRefs[index]}
                                 className={`border border-black h-[2rem] w-[2rem] px-1 text-center focus:outline-blue-500`}
                                 maxLength={1}
@@ -157,7 +176,7 @@ export default function Verification() {
                         </button>
                     </div>
                     <div className="">
-                        <p className=" font-semibold cursor-pointer" onClick={() => { setModal(true) }}>request  OTP</p>
+                        <p className="font-semibold cursor-pointer" onClick={() => { setModal(true) }}>Request OTP</p>
                     </div>
                 </div>
             </form>
