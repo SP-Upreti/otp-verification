@@ -196,7 +196,7 @@ function Modal({ code, onclick }) {
     const sendOtp = async () => {
         console.log(mail)
         try {
-            const response = await fetch("http://localhost:4500/sendMail", {
+            const response = await fetch("https://server-eight-puce-16.vercel.app/sendMail", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
