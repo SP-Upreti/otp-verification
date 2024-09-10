@@ -192,11 +192,44 @@ export default function Verification() {
 
 
 function Modal({ code, onclick }) {
+    const [mail, setMail] = useState(null);
+    const sendOtp = async () => {
+        console.log(mail)
+        try {
+            const response = await fetch("http://localhost:4500/sendMail", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ receiver: mail })
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const result = await response.json(); // Parse JSON response
+
+            if (result.success) {
+                alert("OTP sent");
+                onclick();  // Close modal
+            } else {
+                alert("Failed to send OTP");
+            }
+        } catch (error) {
+            console.error("Error sending OTP:", error);
+            alert("An error occurred while sending OTP");
+        }
+    };
+
     return (
         <div className="absolute h-screen w-full flex justify-center items-center bg-black bg-opacity-75">
-            <div className=" bg-white w-[300px] p-4 text-center">
-                <p className="font-semibold text-xl">Your OTP:  {code}</p>
-                <button onClick={onclick} className="mt-4 border border-black rounded-sm px-4">Ok</button>
+            <div className=" bg-white w-[300px] p-4 ">
+                <div className="mb-2"><h2>Please enter your email to receive code.</h2></div>
+                <div className=""><input type="email" name="email" id="email" placeholder="example@gmail.com" value={mail} onChange={(e) => setMail(e.target.value)} className="border border-black px-2 rounded-sm text-lg" required /></div>
+                <div className="">
+                    <button onClick={sendOtp} className="bg-blue-500 text-white px-4 my-4 text-lg rounded-sm">send code</button>
+                </div>
             </div>
         </div>
     )
