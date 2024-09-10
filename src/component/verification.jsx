@@ -114,7 +114,7 @@ export default function Verification() {
             console.log("OTP from API:", otp);
             console.log("Input code:", inputCode);
             verifycode(inputCode);
-            setLoad(false);
+            setLoad(true);
         } else {
             console.log("OTP is still undefined");
             setLoad(false);
@@ -193,7 +193,9 @@ export default function Verification() {
 
 function Modal({ code, onclick }) {
     const [mail, setMail] = useState(null);
+    const [load, setLoad] = useState(false);
     const sendOtp = async () => {
+        setLoad(true);
         console.log(mail)
         try {
             const response = await fetch("https://server-eight-puce-16.vercel.app/sendMail", {
@@ -228,7 +230,7 @@ function Modal({ code, onclick }) {
                 <div className="mb-2"><h2>Please enter your email to receive code.</h2></div>
                 <div className=""><input type="email" name="email" id="email" placeholder="example@gmail.com" value={mail} onChange={(e) => setMail(e.target.value)} className="border border-black px-2 rounded-sm text-lg" required /></div>
                 <div className="">
-                    <button onClick={sendOtp} className="bg-blue-500 text-white px-4 my-4 text-lg rounded-sm">send code</button>
+                    <button onClick={sendOtp} className="bg-blue-500 text-white px-4 my-4 text-lg rounded-sm">{load ? "sending.." : "send code"}</button>
                 </div>
             </div>
         </div>
