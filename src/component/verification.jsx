@@ -181,7 +181,7 @@ export default function Verification() {
                 </div>
             </form>
             <div className="absolute bottom-[1rem] text-sm">
-                <p>Project created by <a href="" className="text-green-500 font-bold">Surendra</a></p>
+                <p>Project created by <a href="https://github.com/SP-Upreti" className="text-green-500 font-bold">Surendra</a></p>
             </div>
             {
                 modal && (<Modal code={otp} onclick={() => { setModal(false) }} />)
